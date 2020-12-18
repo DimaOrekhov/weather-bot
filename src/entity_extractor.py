@@ -48,7 +48,7 @@ class NatashaLocationExtractor(EntityExtractor):
     TAGGER = NewsNERTagger(NewsEmbedding())
 
     def get_context(self, query: str, current_context: DialogContext) -> DialogContext:
-        city_name = self.get_loc(query)
+        city_name = self.get_loc(query) or self.get_loc(query, capitalize=True)
         if city_name is not None:
             city_name = self.to_known_loc(city_name)
         state_code = RU
@@ -65,19 +65,21 @@ class NatashaLocationExtractor(EntityExtractor):
         return loc
 
     @classmethod
-    def get_loc(cls, query: str):
+    def get_loc(cls, query: str, capitalize: bool = False):
         doc = Doc(query)
         doc.segment(cls.SEGMENTER)
-        capitalized_text = " ".join(
-            tok.text.capitalize() for tok in doc.tokens
-        )
+        if capitalize:
+            capitalized_text = " ".join(
+                tok.text.capitalize() for tok in doc.tokens
+            )
 
-        doc = Doc(capitalized_text)
-        doc.segment(cls.SEGMENTER)
+            doc = Doc(capitalized_text)
+            doc.segment(cls.SEGMENTER)
         doc.tag_ner(cls.TAGGER)
         for span in doc.ner.spans:
             if span.type == 'LOC':
-                return capitalized_text[span.start:span.stop]
+                index = slice(span.start, span.stop)
+                return capitalized_text[index] if capitalize else query[index]
 
 
 class HandcraftedLocationExtractor(EntityExtractor):
@@ -85,15 +87,15 @@ class HandcraftedLocationExtractor(EntityExtractor):
     SAINT_PETERSBURG_ALIASES = tuple(map(
         to_full_match_regex,
         [r"спб",
-         r"питере?",
-         r"петербурге?",
+         r"питер[еа]?",
+         r"петербург[еа]?",
          r"spb",
          r"saint[-\s]petersburg"]
     ))
     MOSCOW_ALIASES = tuple(map(
         to_full_match_regex,
         [r"мск",
-         r"москва",
+         r"москв[аеы]?",
          r"msk",
          r"moscow"]
     ))

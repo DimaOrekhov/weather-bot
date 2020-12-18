@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Iterable
+import re
 
 from src.dialog_context import DialogContext
+from src.utils import to_full_match_regex
 
 
 SAINT_PETERSBURG = "Saint Petersburg"
@@ -17,6 +19,7 @@ class EntityExtractor(ABC):
 
 
 class NatashaDateExtractor(EntityExtractor):
+
 
     def get_context(self, query: str, current_context: DialogContext) -> DialogContext:
         date = None
@@ -44,13 +47,33 @@ class NatashaLocationExtractor(EntityExtractor):
 
 class HandcraftedLocationExtractor(EntityExtractor):
 
+    SAINT_PETERSBURG_ALIASES = tuple(map(
+        to_full_match_regex,
+        [r"спб",
+         r"питере?",
+         r"петербурге?",
+         r"spb",
+         r"saint[-\s]petersburg"]
+    ))
+    MOSCOW_ALIASES = tuple(map(
+        to_full_match_regex,
+        [r"мск",
+         r"москва",
+         r"msk",
+         r"moscow"]
+    ))
+
     def get_context(self, query: str, current_context: DialogContext) -> DialogContext:
         city_name = None
         state_code = None
-        if self.is_spb(query):
+        if HandcraftedLocationExtractor.is_alias_of(
+                query, HandcraftedLocationExtractor.SAINT_PETERSBURG_ALIASES
+        ):
             city_name = SAINT_PETERSBURG
             state_code = RU
-        elif self.is_moscow(query):
+        elif HandcraftedLocationExtractor.is_alias_of(
+                query, HandcraftedLocationExtractor.MOSCOW_ALIASES
+        ):
             city_name = MOSCOW
             state_code = RU
 
@@ -58,11 +81,9 @@ class HandcraftedLocationExtractor(EntityExtractor):
         current_context.state_code = state_code
         return current_context
 
-    def is_spb(self, query: str):
-        return "Санкт-Петербург" in query
-
-    def is_moscow(self, query: str):
-        return "Москв" in query
+    @staticmethod
+    def is_alias_of(query: str, aliases: Iterable[re.Pattern]):
+        return any(regex.fullmatch(query) is not None for regex in aliases)
 
 
 class SequentialEntityExtractor(EntityExtractor):

@@ -12,7 +12,7 @@ from src.entity_extractor import (
     HandcraftedLocationExtractor
 )
 
-weather_bot = telebot.TeleBot(get_token("../tg_token.txt"))
+weather_bot = telebot.TeleBot(get_token("tg_token.txt"))
 
 context_storage = DialogContextStorage(WeatherReportContext)
 

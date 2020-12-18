@@ -27,8 +27,8 @@ class GreetingIntent(Intent):
 
 class EndingIntent(Intent):
 
-    def accept(self, query) -> bool:
-        return query == "Пока"
+    def accept(self, message) -> bool:
+        return message.text == "Пока"
 
 
 class WeatherReportIntent(Intent):

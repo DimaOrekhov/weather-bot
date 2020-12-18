@@ -1,6 +1,6 @@
-def get_token() -> str:
-    with open("../tg_token.txt") as istream:
+def get_token(path) -> str:
+    with open(path) as istream:
         return istream.read()
 
 
-API_KEY = get_token()
+API_KEY = get_token("../open_weather_token.txt")

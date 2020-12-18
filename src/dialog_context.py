@@ -23,6 +23,11 @@ class DialogContext(ABC):
 
 class WeatherReportContext(DialogContext):
 
+    AVAILABLE_CITIES = (
+        'Saint Petersburg',
+        'Moscow'
+    )
+
     def __init__(
             self,
             city_name: Optional[str] = None,
@@ -39,6 +44,9 @@ class WeatherReportContext(DialogContext):
 
         if self.date is None:
             return False, "Уточните, пожалуйста, дату желаемого прогноза"
+
+        if self.city_name not in WeatherReportContext.AVAILABLE_CITIES:
+            return True, "Погода в данном месте мне неизвестна"
 
         payload = {
             'q': f'{self.city_name},{self.state_code}',

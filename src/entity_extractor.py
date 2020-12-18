@@ -9,6 +9,7 @@ from natasha import (
     Segmenter,
     MorphVocab
 )
+import datetime
 
 from src.dialog_context import DialogContext
 from src.utils import to_full_match_regex
@@ -28,10 +29,27 @@ class EntityExtractor(ABC):
 
 class NatashaDateExtractor(EntityExtractor):
 
+    DATES_EXTRACTOR = DatesExtractor(MorphVocab())
+
     def get_context(self, query: str, current_context: DialogContext) -> DialogContext:
         date = None
+        extracted = list(self.DATES_EXTRACTOR(query))
+        if extracted:
+            date = self.get_relative_date(extracted[0].fact)
         current_context.date = date
         return current_context
+
+    @staticmethod
+    def get_relative_date(date):
+        today = datetime.datetime.now()  # TODO: Add time zone!
+        year = date.year or today.year
+        month = date.month or today.month
+        day = date.day or today.day
+        delta = datetime.datetime.combine(
+            date=datetime.date(year, month, day),
+            time=today.time()
+        ) - today
+        return delta.days
 
 
 class HandcraftedDateExtractor(EntityExtractor):

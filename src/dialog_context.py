@@ -36,7 +36,7 @@ class WeatherReportContext(DialogContext):
             self,
             city_name: Optional[str] = None,
             state_code: Optional[str] = None,
-            date: Optional[str] = None
+            date: Optional[int] = None
     ):
         self.city_name = city_name
         self.state_code = state_code
@@ -50,7 +50,7 @@ class WeatherReportContext(DialogContext):
             return False, "Уточните, пожалуйста, дату желаемого прогноза"
 
         if self.city_name not in WeatherReportContext.AVAILABLE_CITIES:
-            return True, "Погода в данном месте мне неизвестна"
+            return True, f"Погода в {self.city_name} мне неизвестна"
 
         payload = {
             'q': f'{self.city_name},{self.state_code}',

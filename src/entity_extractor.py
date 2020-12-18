@@ -1,6 +1,14 @@
 from abc import ABC, abstractmethod
 from typing import List, Iterable
 import re
+from natasha import (
+    Doc,
+    NewsNERTagger,
+    NewsEmbedding,
+    DatesExtractor,
+    Segmenter,
+    MorphVocab
+)
 
 from src.dialog_context import DialogContext
 from src.utils import to_full_match_regex
@@ -20,7 +28,6 @@ class EntityExtractor(ABC):
 
 class NatashaDateExtractor(EntityExtractor):
 
-
     def get_context(self, query: str, current_context: DialogContext) -> DialogContext:
         date = None
         current_context.date = date
@@ -37,12 +44,40 @@ class HandcraftedDateExtractor(EntityExtractor):
 
 class NatashaLocationExtractor(EntityExtractor):
 
+    SEGMENTER = Segmenter()
+    TAGGER = NewsNERTagger(NewsEmbedding())
+
     def get_context(self, query: str, current_context: DialogContext) -> DialogContext:
-        city_name = None
+        city_name = self.get_loc(query)
+        if city_name is not None:
+            city_name = self.to_known_loc(city_name)
         state_code = RU
         current_context.city_name = city_name
         current_context.state_code = state_code
         return current_context
+
+    @staticmethod
+    def to_known_loc(loc: str):
+        if 'санкт-петербург' in loc.lower():
+            return SAINT_PETERSBURG
+        if 'москв' in loc.lower() or 'москов' in loc.lower():
+            return MOSCOW
+        return loc
+
+    @classmethod
+    def get_loc(cls, query: str):
+        doc = Doc(query)
+        doc.segment(cls.SEGMENTER)
+        capitalized_text = " ".join(
+            tok.text.capitalize() for tok in doc.tokens
+        )
+
+        doc = Doc(capitalized_text)
+        doc.segment(cls.SEGMENTER)
+        doc.tag_ner(cls.TAGGER)
+        for span in doc.ner.spans:
+            if span.type == 'LOC':
+                return capitalized_text[span.start:span.stop]
 
 
 class HandcraftedLocationExtractor(EntityExtractor):

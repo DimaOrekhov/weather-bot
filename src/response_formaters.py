@@ -23,8 +23,10 @@ class JsonToTextFormatter(JsonFormatter):
         json_dict = self.try_get_json(json_string)
         if json_dict is None:
             return
+        city = 'Санкт-Петербурге' if json_dict['name'] == 'Saint Petersburg' else 'Москве'
         temperature = json_dict['main']['temp']
         return "\n".join([
+            f"Погода в {city}:\n",
             f"Температура {temperature} градус{self.get_ending(temperature)} по Цельсию, "
             + f"ощущается как {json_dict['main']['feels_like']}",
             f"Скорость ветра {json_dict['wind']['speed']} метра в секунду",

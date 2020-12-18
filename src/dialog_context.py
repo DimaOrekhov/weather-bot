@@ -20,6 +20,10 @@ class DialogContext(ABC):
     def is_complete(self) -> bool:
         pass
 
+    @abstractmethod
+    def is_empty(self) -> bool:
+        pass
+
 
 class WeatherReportContext(DialogContext):
 
@@ -75,6 +79,10 @@ class WeatherReportContext(DialogContext):
     def is_complete(self) -> bool:
         return (self.city_name is not None
                 and self.date is not None)
+
+    def is_empty(self) -> bool:
+        return (self.city_name is None
+                and self.date is None)
 
 
 class DialogContextStorage:

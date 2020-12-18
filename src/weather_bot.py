@@ -54,6 +54,10 @@ def weather_report_handler(message):
     user_id = message.chat.id
     new_context = weather_report_intent.to_context(message.text, WeatherReportContext())
     current_context = context_storage.get_context(user_id, new_context)
+
+    if current_context.is_empty():
+        return unknown_intent_handler(message)
+
     should_clear_context, response = current_context.get_response()
     weather_bot.send_message(user_id, response)
 
@@ -62,6 +66,5 @@ def weather_report_handler(message):
         weather_bot.send_message(user_id, random_followup())
 
 
-@weather_bot.message_handler(func=lambda m: True, content_types=['text'])
 def unknown_intent_handler(message):
     weather_bot.send_message(message.from_user.id, "Не понимаю вашего сообщения :(")

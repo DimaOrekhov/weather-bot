@@ -55,12 +55,11 @@ def weather_report_handler(message):
     new_context = weather_report_intent.to_context(message.text, WeatherReportContext())
     current_context = context_storage.get_context(user_id, new_context)
     should_clear_context, response = current_context.get_response()
+    weather_bot.send_message(user_id, response)
 
     if should_clear_context:
         context_storage.clear_context(user_id)
-
-    weather_bot.send_message(user_id, response)
-    weather_bot.send_message(user_id, random_followup())
+        weather_bot.send_message(user_id, random_followup())
 
 
 @weather_bot.message_handler(func=lambda m: True, content_types=['text'])

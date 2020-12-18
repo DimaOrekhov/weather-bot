@@ -11,6 +11,7 @@ from src.entity_extractor import (
     HandcraftedDateExtractor,
     HandcraftedLocationExtractor
 )
+from src.response_formaters import JsonToTextFormatter
 
 weather_bot = telebot.TeleBot(get_token("tg_token.txt"))
 
@@ -26,6 +27,8 @@ weather_report_intent = WeatherReportIntent(
         HandcraftedLocationExtractor()
     ])
 )
+
+json_to_text_formatter = JsonToTextFormatter()
 
 
 @weather_bot.message_handler(commands=['help'])
@@ -59,6 +62,7 @@ def weather_report_handler(message):
         return unknown_intent_handler(message)
 
     should_clear_context, response = current_context.get_response()
+    response = json_to_text_formatter.from_json(response) or response
     weather_bot.send_message(user_id, response)
 
     if should_clear_context:

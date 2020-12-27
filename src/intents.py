@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 from src.dialog_context import DialogContext
+import re
+from src.utils import matches_any, to_separate_word_regex
 from typing import Optional
 
 
@@ -21,14 +23,24 @@ class Intent(ABC):
 
 class GreetingIntent(Intent):
 
+    HELLO_EXPS = tuple(map(
+        to_separate_word_regex,
+        [r"прив(а|(ет?))?", "здравствуй(те)?", "hello", "greet(ings)?", r"hi"]
+    ))
+
     def accept(self, message) -> bool:
-        return message.text == "Привет"
+        return matches_any(message.text, GreetingIntent.HELLO_EXPS)
 
 
 class EndingIntent(Intent):
 
+    BYE_EXPS = tuple(map(
+        to_separate_word_regex,
+        ["пока", "bye", "good ?bye", "до ?свидания", "ciao"]
+    ))
+
     def accept(self, message) -> bool:
-        return message.text == "Пока"
+        return matches_any(message.text, EndingIntent.BYE_EXPS)
 
 
 class WeatherReportIntent(Intent):

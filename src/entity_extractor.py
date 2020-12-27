@@ -11,7 +11,7 @@ from natasha import (
 import datetime
 
 from src.dialog_context import DialogContext
-from src.utils import to_full_match_regex, matches_any, or_else
+from src.utils import to_full_match_regex, full_matches_any, or_else
 
 
 SAINT_PETERSBURG = "Saint Petersburg"
@@ -71,11 +71,11 @@ class HandcraftedDateExtractor(EntityExtractor):
     def get_context(self, query: str, current_context: DialogContext) -> DialogContext:
         date = current_context.date
 
-        if matches_any(query, HandcraftedDateExtractor.TODAY_ALIASES):
+        if full_matches_any(query, HandcraftedDateExtractor.TODAY_ALIASES):
             date = 0
-        elif matches_any(query, HandcraftedDateExtractor.TOMORROW_ALIASES):
+        elif full_matches_any(query, HandcraftedDateExtractor.TOMORROW_ALIASES):
             date = 1
-        elif matches_any(query, HandcraftedDateExtractor.AFTER_TOMORROW_ALIASES):
+        elif full_matches_any(query, HandcraftedDateExtractor.AFTER_TOMORROW_ALIASES):
             date = 2
 
         current_context.date = or_else(current_context.date, date)
@@ -98,7 +98,7 @@ class NatashaLocationExtractor(EntityExtractor):
 
     @staticmethod
     def to_known_loc(loc: str):
-        if 'санкт-петербург' in loc.lower():
+        if 'санкт-петербург' in loc.lower() or "спб" in loc.lower():
             return SAINT_PETERSBURG
         if 'москв' in loc.lower() or 'москов' in loc.lower():
             return MOSCOW
@@ -143,10 +143,10 @@ class HandcraftedLocationExtractor(EntityExtractor):
     def get_context(self, query: str, current_context: DialogContext) -> DialogContext:
         city_name = None
         state_code = None
-        if matches_any(query, HandcraftedLocationExtractor.SAINT_PETERSBURG_ALIASES):
+        if full_matches_any(query, HandcraftedLocationExtractor.SAINT_PETERSBURG_ALIASES):
             city_name = SAINT_PETERSBURG
             state_code = RU
-        elif matches_any(query, HandcraftedLocationExtractor.MOSCOW_ALIASES):
+        elif full_matches_any(query, HandcraftedLocationExtractor.MOSCOW_ALIASES):
             city_name = MOSCOW
             state_code = RU
 

@@ -41,7 +41,7 @@ def command_help(message):
 def greeting_handler(message):
     weather_bot.send_message(
         message.from_user.id,
-        "Добрый день, пользователь!\n" +
+        "Приветствую!\n" +
         "Я могу предоставить прогноз погоды до двух дней вперед для Москвы и Санк-Петербурга"
     )
     weather_bot.send_message(message.from_user.id, random_greeting_followup())
@@ -49,7 +49,7 @@ def greeting_handler(message):
 
 @weather_bot.message_handler(func=ending_intent.accept, content_types=['text'])
 def ending_handler(message):
-    weather_bot.send_message(message.from_user.id, "До свидания!")
+    weather_bot.send_message(message.from_user.id, "До свидания!\nОбращайтесь снова!")
 
 
 @weather_bot.message_handler(func=weather_report_intent.accept, content_types=['text'])

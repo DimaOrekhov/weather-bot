@@ -98,9 +98,15 @@ class NatashaLocationExtractor(EntityExtractor):
 
     @staticmethod
     def to_known_loc(loc: str):
-        if 'санкт-петербург' in loc.lower() or "спб" in loc.lower():
+        if 'санкт-петербург' in loc.lower() \
+                or 'санкт петербург' in loc.lower() \
+                or "спб" in loc.lower() \
+                or "питер" in loc.lower() \
+                or "петербург" in loc.lower():
             return SAINT_PETERSBURG
-        if 'москв' in loc.lower() or 'москов' in loc.lower():
+        if 'москв' in loc.lower() \
+                or 'москов' in loc.lower()\
+                or 'мск' in loc.lower():
             return MOSCOW
         return loc
 

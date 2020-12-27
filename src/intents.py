@@ -24,7 +24,11 @@ class GreetingIntent(Intent):
 
     HELLO_EXPS = tuple(map(
         to_separate_word_regex,
-        [r"прив(а|(ет?))?", "здравствуй(те)?", "hello", "greet(ings)?", r"hi"]
+        [
+            r"прив(а|(ет?))?", "здравствуй(те)?",
+            "hello", "greet(ings)?", r"hi",
+            "добрый день", "доброе утро", "добрый вечер"
+        ]
     ))
 
     def accept(self, message) -> bool:

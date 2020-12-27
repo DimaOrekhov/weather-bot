@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 import requests
 from typing import Optional, Callable, Tuple
 
-from src.utils import API_KEY
+from src.utils import API_KEY, or_else
 
 
 class DialogContext(ABC):
@@ -70,9 +70,9 @@ class WeatherReportContext(DialogContext):
         if not isinstance(new_context, WeatherReportContext):
             raise TypeError("Can update only with the context of the same type")
 
-        self.city_name = self.city_name or new_context.city_name
-        self.state_code = self.state_code or new_context.state_code
-        self.date = self.date or new_context.date
+        self.city_name = or_else(self.city_name, new_context.city_name)
+        self.state_code = or_else(self.state_code, new_context.state_code)
+        self.date = or_else(self.date, new_context.date)
 
         return self
 

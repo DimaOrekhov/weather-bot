@@ -27,10 +27,10 @@ class DialogContext(ABC):
 
 class WeatherReportContext(DialogContext):
 
-    AVAILABLE_CITIES = (
-        'Saint Petersburg',
-        'Moscow'
-    )
+    AVAILABLE_CITIES = {
+        'Saint Petersburg': {'lon': 30.26, 'lat': 59.89},
+        'Moscow': {'lon': 37.62, 'lat': 55.75}
+    }
 
     def __init__(
             self,
@@ -52,13 +52,18 @@ class WeatherReportContext(DialogContext):
         if self.city_name not in WeatherReportContext.AVAILABLE_CITIES:
             return True, f"Погода в {self.city_name} мне неизвестна"
 
+        lat, lon = (WeatherReportContext.AVAILABLE_CITIES[self.city_name]['lat'],
+                    WeatherReportContext.AVAILABLE_CITIES[self.city_name]['lon'])
+
         payload = {
-            'q': f'{self.city_name},{self.state_code}',
+            'lat': lat,
+            'lon': lon,
             'appid': API_KEY,
-            'units': 'metric'
+            'units': 'metric',
+            'exclude': 'minutely'
         }
         response = requests.get(
-            f"https://api.openweathermap.org/data/2.5/weather", params=payload
+            f"https://api.openweathermap.org/data/2.5/onecall", params=payload
         )
         return True, response.text
 

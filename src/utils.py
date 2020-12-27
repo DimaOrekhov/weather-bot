@@ -17,3 +17,7 @@ def or_else(optional, value):
     if optional is None:
         return value
     return optional
+
+
+def matches_any(query: str, expressions: Iterable[re.Pattern]):
+    return any(regex.fullmatch(query) is not None for regex in expressions)

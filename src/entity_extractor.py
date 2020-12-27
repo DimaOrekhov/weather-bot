@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Iterable
-import re
+from typing import List
 from natasha import (
     Doc,
     NewsNERTagger,
@@ -12,7 +11,7 @@ from natasha import (
 import datetime
 
 from src.dialog_context import DialogContext
-from src.utils import to_full_match_regex
+from src.utils import to_full_match_regex, matches_any
 
 
 SAINT_PETERSBURG = "Saint Petersburg"
@@ -54,8 +53,25 @@ class NatashaDateExtractor(EntityExtractor):
 
 class HandcraftedDateExtractor(EntityExtractor):
 
+    TODAY_ALIASES = tuple(map(
+        to_full_match_regex,
+        [r"сегодня?",
+         r"сейчас",
+         r"щас?"]
+    ))
+    TOMORROW_ALIASES = tuple(map(
+        to_full_match_regex,
+        [r"завтра?"]
+    ))
+
     def get_context(self, query: str, current_context: DialogContext) -> DialogContext:
-        date = "ceгодня"
+        date = None
+
+        if matches_any(query, HandcraftedDateExtractor.TODAY_ALIASES):
+            date = 0
+        elif matches_any(query, HandcraftedDateExtractor.TODAY_ALIASES):
+            date = 1
+
         current_context.date = date
         return current_context
 
@@ -121,24 +137,16 @@ class HandcraftedLocationExtractor(EntityExtractor):
     def get_context(self, query: str, current_context: DialogContext) -> DialogContext:
         city_name = None
         state_code = None
-        if HandcraftedLocationExtractor.is_alias_of(
-                query, HandcraftedLocationExtractor.SAINT_PETERSBURG_ALIASES
-        ):
+        if matches_any(query, HandcraftedLocationExtractor.SAINT_PETERSBURG_ALIASES):
             city_name = SAINT_PETERSBURG
             state_code = RU
-        elif HandcraftedLocationExtractor.is_alias_of(
-                query, HandcraftedLocationExtractor.MOSCOW_ALIASES
-        ):
+        elif matches_any(query, HandcraftedLocationExtractor.MOSCOW_ALIASES):
             city_name = MOSCOW
             state_code = RU
 
         current_context.city_name = city_name
         current_context.state_code = state_code
         return current_context
-
-    @staticmethod
-    def is_alias_of(query: str, aliases: Iterable[re.Pattern]):
-        return any(regex.fullmatch(query) is not None for regex in aliases)
 
 
 class SequentialEntityExtractor(EntityExtractor):

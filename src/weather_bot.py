@@ -44,7 +44,8 @@ def greeting_handler(message):
         "Приветствую!\n" +
         "Я могу предоставить прогноз погоды до двух дней вперед для Москвы и Санк-Петербурга"
     )
-    weather_bot.send_message(message.from_user.id, random_greeting_followup())
+    if not weather_report_handler(message, True):
+        weather_bot.send_message(message.from_user.id, random_greeting_followup())
 
 
 @weather_bot.message_handler(func=ending_intent.accept, content_types=['text'])
@@ -53,13 +54,15 @@ def ending_handler(message):
 
 
 @weather_bot.message_handler(func=weather_report_intent.accept, content_types=['text'])
-def weather_report_handler(message):
+def weather_report_handler(message, internal_call=False):
     user_id = message.chat.id
     new_context = weather_report_intent.to_context(message.text, WeatherReportContext())
     current_context = context_storage.get_context(user_id, new_context)
 
     if current_context.is_empty():
-        return unknown_intent_handler(message)
+        if not internal_call:
+            return unknown_intent_handler(message)
+        return False
 
     should_clear_context, response = current_context.get_response()
     response = json_to_text_formatter.from_json(response, current_context.city_name, current_context.date) or response
@@ -68,6 +71,8 @@ def weather_report_handler(message):
     if should_clear_context:
         context_storage.clear_context(user_id)
         weather_bot.send_message(user_id, random_followup())
+
+    return True
 
 
 def unknown_intent_handler(message):

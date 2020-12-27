@@ -11,7 +11,7 @@ from natasha import (
 import datetime
 
 from src.dialog_context import DialogContext
-from src.utils import to_full_match_regex, full_matches_any, or_else
+from src.utils import to_full_match_regex, full_matches_any, or_else, to_separate_word_regex
 
 
 SAINT_PETERSBURG = "Saint Petersburg"

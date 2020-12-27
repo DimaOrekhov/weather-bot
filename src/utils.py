@@ -25,8 +25,16 @@ def or_else(optional, value):
 
 
 def full_matches_any(query: str, expressions: Iterable[re.Pattern]):
-    return any(regex.fullmatch(query) is not None for regex in expressions)
+    return any(
+        regex.fullmatch(line) is not None
+        for regex in expressions
+        for line in query.split('\n')
+    )
 
 
 def matches_any(query: str, expressions: Iterable[re.Pattern]):
-    return any(regex.match(query) is not None for regex in expressions)
+    return any(
+        regex.match(line) is not None
+        for regex in expressions
+        for line in query.split('\n')
+    )

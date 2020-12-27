@@ -49,6 +49,12 @@ class WeatherReportContext(DialogContext):
         if self.date is None:
             return False, "Уточните, пожалуйста, дату желаемого прогноза"
 
+        if self.date > 7:
+            return True, "Так далеко в будущее заглянуть я не могу"
+
+        if self.date < 0:
+            return True, "Знание о прошлом мне не доступно"
+
         if self.city_name not in WeatherReportContext.AVAILABLE_CITIES:
             return True, f"Погода в {self.city_name} мне неизвестна"
 
@@ -60,7 +66,8 @@ class WeatherReportContext(DialogContext):
             'lon': lon,
             'appid': API_KEY,
             'units': 'metric',
-            'exclude': 'minutely'
+            'exclude': 'minutely',
+            'lang': 'ru'
         }
         response = requests.get(
             f"https://api.openweathermap.org/data/2.5/onecall", params=payload

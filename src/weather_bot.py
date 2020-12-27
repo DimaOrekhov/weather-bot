@@ -62,7 +62,7 @@ def weather_report_handler(message):
         return unknown_intent_handler(message)
 
     should_clear_context, response = current_context.get_response()
-    response = json_to_text_formatter.from_json(response) or response
+    response = json_to_text_formatter.from_json(response, current_context.city_name, current_context.date) or response
     weather_bot.send_message(user_id, response)
 
     if should_clear_context:

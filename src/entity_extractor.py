@@ -11,7 +11,7 @@ from natasha import (
 import datetime
 
 from src.dialog_context import DialogContext
-from src.utils import to_full_match_regex, matches_any
+from src.utils import to_full_match_regex, matches_any, or_else
 
 
 SAINT_PETERSBURG = "Saint Petersburg"
@@ -41,9 +41,9 @@ class NatashaDateExtractor(EntityExtractor):
     @staticmethod
     def get_relative_date(date):
         today = datetime.datetime.now()  # TODO: Add time zone!
-        year = date.year or today.year
-        month = date.month or today.month
-        day = date.day or today.day
+        year = or_else(date.year, today.year)
+        month = or_else(date.month, today.month)
+        day = or_else(date.day, today.day)
         delta = datetime.datetime.combine(
             date=datetime.date(year, month, day),
             time=today.time()
@@ -63,16 +63,22 @@ class HandcraftedDateExtractor(EntityExtractor):
         to_full_match_regex,
         [r"завтра?"]
     ))
+    AFTER_TOMORROW_ALIASES = tuple(map(
+        to_full_match_regex,
+        [r"после ?завтра"]
+    ))
 
     def get_context(self, query: str, current_context: DialogContext) -> DialogContext:
-        date = None
+        date = current_context.date
 
         if matches_any(query, HandcraftedDateExtractor.TODAY_ALIASES):
             date = 0
-        elif matches_any(query, HandcraftedDateExtractor.TODAY_ALIASES):
+        elif matches_any(query, HandcraftedDateExtractor.TOMORROW_ALIASES):
             date = 1
+        elif matches_any(query, HandcraftedDateExtractor.AFTER_TOMORROW_ALIASES):
+            date = 2
 
-        current_context.date = date
+        current_context.date = or_else(current_context.date, date)
         return current_context
 
 
@@ -144,8 +150,8 @@ class HandcraftedLocationExtractor(EntityExtractor):
             city_name = MOSCOW
             state_code = RU
 
-        current_context.city_name = city_name
-        current_context.state_code = state_code
+        current_context.city_name = or_else(current_context.city_name, city_name)
+        current_context.state_code = or_else(current_context.state_code, state_code)
         return current_context
 
 
